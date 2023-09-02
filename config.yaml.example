@@ -1,0 +1,48 @@
+processing:
+  # Number of threads for tasks
+  processing_threads: 4
+  # More threads don't make downloads faster unless you are limited by single core performance.
+  download_threads: 1
+  # Location for uncompressed LIDAR files.
+  las_path: "./dataset/uncompressed/"
+  # Compress LIDAR files and move them to a new location (perhaps another disk?) for safe keeping (and later usage).
+  compress_to_laz: True
+  laz_path: "/other/location/compressed"
+  # Deletes uncompressed LIDAR files after they have been processed.
+  # I would recommend enabling this, unless you have spare 10TB of storage.
+  delete_las_after_processing: True
+
+outputs:
+  # Example outputs.
+  # Generates a RGB image with colors based on point classification.
+  - type: color
+    enabled: True
+    path: "./output/classification/"
+    color_map:
+      1: [170, 170, 170]    # Unclassified
+      2: [170, 85, 0]       # Ground
+      3: [0, 170, 170]      # Low Vegetation
+      4: [85, 255, 85]      # Medium Vegetation
+      5: [0, 170, 0]        # High Vegetation
+      6: [255, 85, 85]      # Building
+      #7: [170, 0, 0]        # Low Point (Noise)
+      8: [0, 0, 0]          # Road Surface (not everywhere has this classification)
+      9: [255, 255, 85]     # Wire - Conductor (Phase)
+  # Generates a single bit (black and white) image with white where a point with the specified classification is located.
+  - type: binary
+    enabled: True
+    path: "./output/buildings/"
+    point_class: 6
+  # All of these can be repeated for multiple outputs.
+  - type: binary
+    enabled: True
+    path: "./output/ground/"
+    point_class: 2
+  # Generates a linear (0 - 255) image with values based on the input value for each point.
+  # In this case it will make a height map from the value z.
+  - type: linear
+    enabled: True
+    path: "./output/height/"
+    value_name: z # z for height
+    min_value: 0  # Lowest point (black)
+    max_value: 312  # Highest point (white)
