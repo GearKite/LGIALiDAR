@@ -24,7 +24,7 @@ coloredlogs.install(level="DEBUG", logger=log)
 
 # Load config
 with open("./config.yaml") as f:
-    config = yaml.safe_load(f)
+    config = yaml.safe_load(f)["geotiff_from_lidar"]
 
 # Define the CRS for the input point cloud (CRS 3059)
 CRS = CRS.from_epsg(3059)
@@ -65,7 +65,7 @@ def download_file(url, save_path, tiff_filename):
         # Create directory if it does not exist
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         # Download file
-        os.system(f"wget -q --no-verbose -O {save_path} {url}") # wget is faster
+        os.system(f"wget -O {save_path} {url}") # wget is faster
         '''
         response = requests.get(url, stream=True)
         response.raise_for_status()
@@ -126,6 +126,7 @@ def process_file_manager():
                     os.remove(input_path)
         # This usually happens if downloading or compression get interrupted
         except pylas.errors.PylasError:
+            log.warning(f"Redownloading {input_path}")
             redownload_file(input_path, tiff_filename, url)
         except Exception:
             log.error(f"Could not render {input_path} to {tiff_filename}! Deleting LAS file and adding it back to queue")
